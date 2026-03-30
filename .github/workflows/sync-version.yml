@@ -70,7 +70,7 @@ jobs:
           git config user.name "froala-travis-bot"
           git config user.email "froala_git_travis_bot@idera.com"
 
-          git add app/assets/javascripts app/assets/stylesheets
+          git add app/webroot/javascripts app/webroot/stylesheets
 
           git commit -m "chore: release v${VERSION}" || echo "Nothing to commit"
           git push origin "$BRANCH"
