@@ -48,7 +48,6 @@ jobs:
           fi
 
 
-
       - name: Sync assets
         env:
           GIT_TOKEN: ${{ secrets.PAT }}
@@ -58,8 +57,7 @@ jobs:
             /tmp/wysiwyg-main
 
           mkdir -p app/webroot/js
-          mkdir -p app/webroot/css
-          
+          mkdir -p app/webroot/css 
           
           rsync -av --delete /tmp/wysiwyg-main/js/ webroot/js/
           rsync -av --delete /tmp/wysiwyg-main/css/ webroot/css/
