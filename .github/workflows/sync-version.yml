@@ -2,9 +2,11 @@ name: Sync Version – cake
 on:
  repository_dispatch:
    types: [version_update]
+   
 permissions:
  contents: write
  pull-requests: write
+ 
 jobs:
  sync:
    runs-on: ubuntu-latest
@@ -14,6 +16,7 @@ jobs:
        with:
          token: ${{ secrets.PAT }}
          fetch-depth: 0
+         
      - name: Load & validate version
        run: |
          VERSION="${{ github.event.client_payload.version }}"
@@ -23,6 +26,7 @@ jobs:
            exit 1
          fi
          echo "VERSION=$VERSION" >> $GITHUB_ENV
+         
      - name: Prepare release branch
        run: |
          BRANCH="release-v${VERSION}"
@@ -34,6 +38,7 @@ jobs:
          else
            git checkout -b "$BRANCH"
          fi
+         
      - name: Sync assets
        env:
          GIT_TOKEN: ${{ secrets.PAT }}
@@ -45,6 +50,7 @@ jobs:
          mkdir -p webroot/css
          rsync -av --delete /tmp/wysiwyg-main/js/ webroot/js/
          rsync -av --delete /tmp/wysiwyg-main/css/ webroot/css/
+         
      - name: Commit & push
        run: |
          git config user.name "froala-travis-bot"
@@ -52,6 +58,7 @@ jobs:
          git add webroot/js webroot/css
          git commit -m "chore: release v${VERSION}" || echo "Nothing to commit"
          git push origin "$BRANCH"
+         
      - name: Create Pull Request
        env:
          GH_TOKEN: ${{ secrets.PAT }}
