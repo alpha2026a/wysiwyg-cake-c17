@@ -56,8 +56,8 @@ jobs:
             "https://x-access-token:${GIT_TOKEN}@github.com/froala/wysiwyg-editor.git" \
             /tmp/wysiwyg-main
 
-          mkdir -p app/webroot/js
-          mkdir -p app/webroot/css 
+          mkdir -p webroot/js
+          mkdir -p webroot/css 
           
           rsync -av --delete /tmp/wysiwyg-main/js/ webroot/js/
           rsync -av --delete /tmp/wysiwyg-main/css/ webroot/css/
@@ -68,22 +68,25 @@ jobs:
           git config user.name "froala-travis-bot"
           git config user.email "froala_git_travis_bot@idera.com"
 
-          git add app/webroot/js app/webroot/css
+          git add webroot/js webroot/css
 
           git commit -m "chore: release v${VERSION}" || echo "Nothing to commit"
           git push origin "$BRANCH"
 
 
-      - name: Create Pull Request
-        env:
-          GH_TOKEN: ${{ secrets.PAT }}
-          RELEASE_NOTES: ${{ github.event.client_payload.release_notes }}
-        run: |
-          PR_BODY=$(printf "release: yes\n\n## Release Notes (from primary repo)\n\n%s\n" "$RELEASE_NOTES")
-
-          gh pr create \
-            --base master \
-            --head "$BRANCH" \
-            --title "Release v${VERSION}" \
-            --body "$PR_BODY" \
-            || echo "Pull request already exists"
+       - name: Create Pull Request
+         env:
+           GH_TOKEN: ${{ secrets.PAT }}
+           RELEASE_NOTES: ${{ github.event.client_payload.release_notes }}
+         run: |
+           git fetch origin master
+           if git diff --quiet origin/master..."$BRANCH"; then
+             echo "No commits between $BRANCH and master. Skipping PR creation."
+             exit 0
+           fi
+           
+           gh pr create \
+             --base master \
+             --head "$BRANCH" \
+             --title "Release v${VERSION}" \
+             --body "$PR_BODY" 
